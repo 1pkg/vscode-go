@@ -161,7 +161,8 @@ export function parseFilePrelude(text: string): Prelude {
 		} else if (line.match(/^(\s)*import(\s)+[^\(]/)) {
 			ret.imports.push({ kind: 'single', start: i, end: i, pkgs: [] });
 		}
-		if (line.match(/^(\s)*(\/\*.*\*\/)*\s*\)/)) {  // /* comments */
+		if (line.match(/^(\s)*(\/\*.*\*\/)*\s*\)/)) {
+			// /* comments */
 			if (ret.imports[ret.imports.length - 1].end === -1) {
 				ret.imports[ret.imports.length - 1].end = i;
 			}
@@ -413,7 +414,7 @@ function resolveToolsGopath(): string {
 }
 
 export function getBinPath(tool: string): string {
-	const alternateTools: { [key: string]: string } = getGoConfig().get('alternateTools');
+	const alternateTools: { [key: string]: string } = getGoConfig().get('alternateTools', {});
 	const alternateToolPath: string = alternateTools[tool];
 
 	return getBinPathWithPreferredGopath(
