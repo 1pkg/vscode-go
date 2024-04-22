@@ -9,11 +9,11 @@ import cp = require('child_process');
 import fs = require('fs');
 import path = require('path');
 import { SemVer } from 'semver';
-import vscode = require('vscode');
 import { getLanguageServerToolPath } from './goLanguageServer';
 import { envPath, getToolFromToolPath } from './goPath';
 import { hideGoStatus, outputChannel, showGoStatus } from './goStatus';
 import {
+	Tool,
 	containsString,
 	containsTool,
 	disableModulesForWildcard,
@@ -22,19 +22,19 @@ import {
 	getImportPathWithVersion,
 	getTool,
 	hasModSuffix,
-	isGocode,
-	Tool
+	isGocode
 } from './goTools';
 import {
+	GoVersion,
 	getBinPath,
 	getCurrentGoPath,
 	getGoConfig,
 	getGoVersion,
 	getTempFilePath,
 	getToolsGopath,
-	GoVersion,
 	resolvePath
 } from './util';
+import vscode = require('vscode');
 
 // declinedUpdates tracks the tools that the user has declined to update.
 const declinedUpdates: Tool[] = [];
@@ -252,23 +252,9 @@ export function installTools(missing: ToolAtVersion[], goVersion: GoVersion): Pr
 								resolve([...sofar, null]);
 								return;
 							}
-							const args = ['get', '-v'];
-							// Only get tools at master if we are not using modules.
-							if (modulesOffForTool) {
-								args.push('-u');
-							}
-							// Tools with a "mod" suffix should not be installed,
-							// instead we run "go build -o" to rename them.
-							if (hasModSuffix(tool)) {
-								args.push('-d');
-							}
-							let importPath: string;
-							if (modulesOffForTool) {
-								importPath = getImportPath(tool, goVersion);
-							} else {
-								importPath = getImportPathWithVersion(tool, tool.version, goVersion);
-							}
-							args.push(importPath);
+							const args = ['install'];
+							const importPath = getImportPath(tool, goVersion);
+							args.push(importPath + '@latest');
 							cp.execFile(goRuntimePath, args, opts, (err, stdout, stderr) => {
 								if (stderr.indexOf('unexpected directory layout:') > -1) {
 									outputChannel.appendLine(
