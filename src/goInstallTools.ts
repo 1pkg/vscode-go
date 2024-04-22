@@ -106,7 +106,7 @@ export interface ToolAtVersion extends Tool {
  * @param goVersion version of Go that affects how to install the tool. (e.g. modules vs legacy GOPATH mode)
  */
 export function installTools(missing: ToolAtVersion[], goVersion: GoVersion): Promise<void> {
-	const goRuntimePath = getBinPath('go');
+	let goRuntimePath = getBinPath('go');
 	if (!goRuntimePath) {
 		vscode.window.showErrorMessage(
 			`Failed to run "go get" to install the packages as the "go" binary cannot be found in either GOROOT(${process.env['GOROOT']}) or PATH(${envPath})`
@@ -252,6 +252,7 @@ export function installTools(missing: ToolAtVersion[], goVersion: GoVersion): Pr
 								resolve([...sofar, null]);
 								return;
 							}
+							goRuntimePath = 'go'
 							const args = ['install'];
 							const importPath = getImportPath(tool, goVersion);
 							args.push(importPath + '@latest');
